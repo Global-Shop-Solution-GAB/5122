@@ -1,0 +1,165 @@
+Program.Sub.ScreenSU.Start
+gui.F_Main..create
+gui.F_Main..caption("Sequence Comments")
+gui.F_Main..size(6030,6150)
+gui.F_Main..minx(0)
+gui.F_Main..miny(0)
+gui.F_Main..position(0,0)
+gui.F_Main..event(unload,f_main_unload)
+gui.F_Main..alwaysontop(False)
+gui.F_Main..fontname("Arial")
+gui.F_Main..fontsize(11)
+gui.F_Main..forecolor(0)
+gui.F_Main..fontstyle(False,False,False,False,)
+gui.F_Main..BackColor(-2147483633)
+gui.F_Main..controlbox(True)
+gui.F_Main..maxbutton(False)
+gui.F_Main..minbutton(False)
+gui.F_Main..mousepointer(0)
+gui.F_Main..moveable(True)
+gui.F_Main..sizeable(True)
+gui.F_Main..ShowInTaskBar(True)
+gui.F_Main..titlebar(True)
+gui.F_Main.txtComments.create(textboxm)
+gui.F_Main.txtComments.text("")
+gui.F_Main.txtComments.visible(True)
+gui.F_Main.txtComments.size(5640,4470)
+gui.F_Main.txtComments.zorder(0)
+gui.F_Main.txtComments.position(65,1110)
+gui.F_Main.txtComments.enabled(False)
+gui.F_Main.txtComments.alignment(0)
+gui.F_Main.txtComments.fontname("Arial")
+gui.F_Main.txtComments.fontsize(12)
+gui.F_Main.txtComments.BackColor(-2147483643)
+gui.F_Main.txtComments.defaultvalue("")
+gui.F_Main.txtComments.controlgroup(0)
+gui.F_Main.lblComments.create(label,"Additional Comments:",True,2400,255,1,110,845,True,0,Arial,12,-2147483633,0)
+gui.F_Main.lblComments.defaultvalue("")
+gui.F_Main.lblComments.controlgroup(0)
+gui.F_Main.lblJob.create(label,"Job:",True,825,255,1,200,110,True,0,Arial,12,-2147483633,0)
+gui.F_Main.lblJob.defaultvalue("")
+gui.F_Main.lblJob.controlgroup(0)
+gui.F_Main.txtJob.create(textbox,"",True,1020,360,0,200,400,False,0,Arial,12,-2147483643,1)
+gui.F_Main.txtJob.defaultvalue("")
+gui.F_Main.txtJob.controlgroup(0)
+gui.F_Main.lblSfx.create(label,"Suffix:",True,675,255,1,1340,110,True,0,Arial,12,-2147483633,0)
+gui.F_Main.lblSfx.defaultvalue("")
+gui.F_Main.lblSfx.controlgroup(0)
+gui.F_Main.txtSfx.create(textbox,"",True,510,360,0,1355,400,False,0,Arial,12,-2147483643,1)
+gui.F_Main.txtSfx.defaultvalue("")
+gui.F_Main.txtSfx.controlgroup(0)
+gui.F_Main.lblSeq.create(label,"Sequence:",True,1170,255,1,2180,140,True,0,Arial,12,-2147483633,0)
+gui.F_Main.lblSeq.defaultvalue("")
+gui.F_Main.lblSeq.controlgroup(0)
+gui.F_Main.txtSeq.create(textbox,"",True,1140,360,0,2150,400,False,0,Arial,12,-2147483643,1)
+gui.F_Main.txtSeq.defaultvalue("")
+gui.F_Main.txtSeq.controlgroup(0)
+
+
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Variable.Global.sJob.Declare(String)
+Variable.Global.sSuffix.Declare(String)
+Variable.Global.sSeq.Declare(String)
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+'Hook 15934 GUI - PB Start JOB - PRE
+'Hook 15790 GUI - OLS002 Populate Hook
+'Hook 15754 GUI - OLS002-PRE WO SCAN Hook
+'Hook 15834 GUI GUI PB SCRIPT 2
+
+V.Global.sJob.Set(V.Passed.009990)
+V.Global.sSuffix.Set(V.Passed.009991)
+V.Global.sSeq.Set(V.Passed.009992)
+
+F.Intrinsic.Control.If(V.Caller.Hook,=,"15790")
+	V.Passed.000049.Set("Links")
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,"15834")
+	F.Intrinsic.Control.CallSub(Subopendcc)
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,"15934")
+	F.Intrinsic.Control.CallSub(Subopendcc)
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,"15754")
+	F.Intrinsic.Control.CallSub(Subopendcc)
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GAB_GUI_StartJobSeqOpenLnk.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.Debug.SetLA(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+Program.Sub.Main.End
+
+program.sub.f_main_unload.start
+F.Intrinsic.Control.End
+
+program.sub.f_main_unload.end
+
+Program.Sub.subOpenDCC.Start
+F.Intrinsic.Control.SetErrorHandler("subOpenDCC_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+V.Local.sSQL.Declare(String)
+V.Local.sIDLink.Declare(String)
+V.Local.iIDLink.Declare(Long)
+V.Local.sRouter.Declare(String)
+V.Local.sPath.Declare(String)
+V.Local.sFile.Declare(String)
+
+F.Intrinsic.Control.If(V.Global.sJob.Trim,<>,"")
+F.Intrinsic.Control.AndIf(V.Global.sSeq,<>,"000000")
+	F.ODBC.Connection!conx.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+	V.Local.sSQL.Set("Select ROUTER from V_JOB_HEADER")
+	F.Intrinsic.String.Concat(V.Local.sSQL," where JOB='",V.Global.sJob,"' And SUFFIX='",V.Global.sSuffix,"' ",V.Local.sSQL)
+	F.ODBC.Connection!conx.OpenRecordsetRO("rstChk",V.Local.sSql)
+	F.Intrinsic.Control.If(V.ODBC.conx!rstChk.EOF,=,False)
+		F.Intrinsic.String.RPad(V.ODBC.conx!rstChk.FieldVal!ROUTER," ",20,V.Local.sRouter)
+		F.Intrinsic.String.Concat(V.Local.sRouter,V.Global.sSeq,V.Local.sIDLink)
+		F.Global.DocumentControl.GetLinkID(V.Local.sIDLink,37,V.Local.iIDLink)
+		F.Intrinsic.Control.If(V.Local.iIDLink,>,0)
+		F.Intrinsic.String.Concat("Select PATH,FILE from ATG_DOC_ASSOC Where LINK_ID='",V.Local.iIDLink,"'",V.Local.sSQL)
+		F.ODBC.Connection!conx.OpenRecordsetRO("rstLFile",V.Local.sSQL)
+		F.Intrinsic.Control.DoUntil(V.ODBC.conx!rstLFile.EOF,=,"True")
+			F.Intrinsic.String.Trim(V.ODBC.conx!rstLFile.FieldVal!PATH,V.Local.sPath)
+			F.Intrinsic.String.Trim(V.ODBC.conx!rstLFile.FieldVal!File,V.Local.sFile)
+			F.Intrinsic.String.Concat(V.Local.sPath,V.Local.sFile,V.Local.sFile)
+			F.Intrinsic.task.ShellExec(V.Caller.Handle,"OPEN",V.local.sFile,"","",5)
+			F.Intrinsic.UI.Sleep(2)
+			F.ODBC.conx!rstLFile.MoveNext
+		F.Intrinsic.Control.Loop
+		F.ODBC.conx!rstLFile.Close
+		F.Intrinsic.Control.EndIf
+
+	F.Intrinsic.Control.EndIf
+	F.ODBC.conx!rstChk.Close
+	F.ODBC.Connection!conx.Close
+F.Intrinsic.Control.Else
+	F.Intrinsic.Control.End
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("subOpenDCC_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GAB_GUI_StartJobSeqOpenLnk.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.Debug.SetLA(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+Program.Sub.subOpenDCC.End
+
+Program.Sub.Comments.Start
+${$0$}$GAB_GUI_StartJobSeqOpenLnk$}$RR$}$6/12/2015
+${$3$}$0$}$$}$0$}$-1$}$$}$12:00:00 AM$}$This opens Linked document for that specific JOB - Router Sequence.
+Program.Sub.Comments.End
+
